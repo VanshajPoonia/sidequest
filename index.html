@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sidequest</title>
+  <meta name="description" content="Turns the real map around you into a short walking quest. Stops come from OpenStreetMap; the missions are written by Gemma, running in your browser.">
+  <meta name="theme-color" content="#f5efe2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1819" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">🧭 Sidequest</p>
+      <h1>You have forty minutes.<br>The map has a plan.</h1>
+      <p class="lede">Pick a start and a length. Sidequest finds real things nearby on OpenStreetMap, routes a loop through them, and has a small AI model on this device write you one thing to do at each stop.</p>
+    </header>
+
+    <section class="setup" aria-label="Plan a walk">
+      <div class="field">
+        <h2>Where</h2>
+        <button id="here" class="chip wide" aria-pressed="false">📍 Start where I am</button>
+        <p class="or">or try one of these</p>
+        <div id="places" class="chips"></div>
+        <p id="where-label" class="small" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <h2>How long</h2>
+        <div class="seg" data-group="minutes">
+          <button data-value="20">20 min</button><button data-value="40">40 min</button><button data-value="60">1 hour</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <h2>Who's going</h2>
+        <div class="seg" data-group="who">
+          <button data-value="solo">Just me</button><button data-value="kids">With a kid</button><button data-value="dog">With a dog</button>
+        </div>
+      </div>
+
+      <button id="go" class="primary big" disabled>Make my quest</button>
+      <p class="small">The missions are written by <strong>Gemma 3</strong> (Google's open-weight model) running in this tab. The first quest downloads it, <span id="size">860 MB</span>, once; best on wifi, before you head out. Nothing you choose is sent to an AI service.</p>
+      <p id="status" class="status" aria-live="polite"></p>
+      <progress id="status-bar" max="1" value="0" hidden></progress>
+    </section>
+
+    <section id="quest" class="quest" hidden aria-live="polite">
+      <p class="kicker">Your quest</p>
+      <h2 id="q-title"></h2>
+      <p id="q-meta" class="small"></p>
+      <div id="map" class="map"></div>
+      <ol id="stops" class="stops"></ol>
+      <p id="progress" class="progress"></p>
+      <div class="actions">
+        <button id="again">Another one</button>
+        <button id="share">Share</button>
+      </div>
+      <p class="small">Once written, this quest is saved on your phone and opens with no signal. Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.</p>
+    </section>
+
+    <footer>
+      <p>No account, no server, no API key. Stops are never chosen by the model: code picks them from the map and checks the route fits your time. Gemma only writes, and anything it writes that is not backed by the map gets sent back. <a href="https://github.com/VanshajPoonia/sidequest">Source</a></p>
+    </footer>
+  </main>
+</body>
+</html>

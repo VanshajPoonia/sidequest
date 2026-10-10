@@ -1,0 +1,10 @@
+{
+  "name": "Sidequest",
+  "short_name": "Sidequest",
+  "description": "Turns the real map around you into a short walking quest.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5efe2",
+  "theme_color": "#1f5f5d",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

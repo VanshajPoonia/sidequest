@@ -1,0 +1,16 @@
+{
+  "name": "sidequest",
+  "version": "1.0.0",
+  "description": "Turns the real map around you into a short walking quest, written by Gemma running in your browser",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "freeze": "node scripts/freeze-places.mjs",
+    "test": "node tests/plan.mjs && node tests/gemma.mjs"
+  },
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@huggingface/transformers": "^4.3.1"
+  },
+  "private": true
+}
