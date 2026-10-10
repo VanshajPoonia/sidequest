@@ -4,10 +4,11 @@
 // cover it, so Overpass learns which block you are near, never which doorstep. The
 // exact position is only used locally, after the response arrives.
 
+// private.coffee sends no CORS headers, so a web page cannot read its answers; Node can.
 const ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
+  ...(typeof window === 'undefined' ? ['https://overpass.private.coffee/api/interpreter'] : []),
 ];
 
 // overpass-api.de answers 406 to clients with no User-Agent. Browsers always send one
