@@ -177,7 +177,7 @@ $('#stops').addEventListener('change', (e) => {
 
 $('#share').addEventListener('click', async () => {
   const q = current;
-  const text = `${q.title || 'Sidequest'}: ${(q.metres / 1000).toFixed(1)} km, ${q.stops.length} stops\n` +
+  const text = `${q.title || 'WalkQuest'}: ${(q.metres / 1000).toFixed(1)} km, ${q.stops.length} stops\n` +
     q.stops.map((s, i) => `${i + 1}. ${s.title}: ${s.mission}`).join('\n') + `\n${location.origin}${location.pathname}`;
   try {
     if (navigator.share) await navigator.share({ text });

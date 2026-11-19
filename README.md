@@ -1,8 +1,10 @@
-# Sidequest 🧭
+# WalkQuest 🧭
+
+**Walking Quests From Your Map.** Formerly called Sidequest.
 
 Turns the real map around you into a short walking quest.
 
-Pick a start and a length (20 minutes, 40, an hour). Sidequest reads OpenStreetMap around you, picks the most interesting real things within reach (a 500-year-old tomb, a blue plaque, the 1894 Liberty Tree, a whispering bench), routes the shortest loop through them that fits your time, and then **Gemma, running in your browser**, writes you one small thing to do at each stop.
+Pick a start and a length (20 minutes, 40, an hour). WalkQuest reads OpenStreetMap around you, picks the most interesting real things within reach (a 500-year-old tomb, a blue plaque, the 1894 Liberty Tree, a whispering bench), routes the shortest loop through them that fits your time, and then **Gemma, running in your browser**, writes you one small thing to do at each stop.
 
 **Live:** https://vanshajpoonia.github.io/sidequest/
 

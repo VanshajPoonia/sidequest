@@ -1,6 +1,6 @@
 {
-  "name": "Sidequest",
-  "short_name": "Sidequest",
+  "name": "WalkQuest: Walking Quests From Your Map",
+  "short_name": "WalkQuest",
   "description": "Turns the real map around you into a short walking quest.",
   "start_url": "./",
   "display": "standalone",
