@@ -18,6 +18,7 @@
       <p class="kicker">🧭 WalkQuest</p>
       <h1>You have forty minutes.<br>The map has a plan.</h1>
       <p class="lede">Pick a start and a length. WalkQuest finds real things nearby on OpenStreetMap, routes a loop through them, and has a small AI model on this device write you one thing to do at each stop.</p>
+      <p class="small">Playing in a team event? <a href="event.html">Join with a code</a>.</p>
     </header>
 
     <section class="setup" aria-label="Plan a walk">
@@ -61,6 +62,23 @@
         <button id="share">Share</button>
       </div>
       <p class="small">Once written, this quest is saved on your phone and opens with no signal. Prove a stop with a photo and a vision model checks it on this phone (<span class="mb">89 MB</span>, once). Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.</p>
+
+      <div class="start-event">
+        <p class="kicker">Team event</p>
+        <p class="small">Several teams walk this quest at once, prove each stop with a photo, and race on a live leaderboard. You get a code to share and a dashboard.</p>
+        <div class="field">
+          <h2><label for="event-name">Event name</label></h2>
+          <input id="event-name" class="text" maxlength="60" placeholder="Freshers week walk">
+        </div>
+        <div class="field">
+          <h2>Time limit</h2>
+          <div class="seg" data-group="limit">
+            <button data-value="30">30 min</button><button data-value="45">45 min</button><button data-value="60">1 hour</button><button data-value="0">None</button>
+          </div>
+        </div>
+        <button id="host-event" class="primary">Run it as a team event</button>
+        <p id="host-status" class="status" aria-live="polite"></p>
+      </div>
     </section>
 
     <footer>

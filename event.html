@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WalkQuest: Team Event</title>
+  <meta name="description" content="Teams walk the same quest, prove each stop with a photo checked on the phone, and watch the leaderboard.">
+  <meta name="theme-color" content="#f5efe2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1819" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script type="module" src="src/event-app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">🧭 WalkQuest · Team event</p>
+      <h1 id="ev-name">Team event</h1>
+      <p id="ev-meta" class="lede"></p>
+    </header>
+
+    <p class="note">This event lives in this browser only. Teams on other phones cannot join yet. To try it, open the join link in another tab and play as a second team.</p>
+
+    <section id="join" class="setup" hidden>
+      <form id="join-form">
+        <div class="field">
+          <h2><label for="code">Event code</label></h2>
+          <input id="code" class="text code-input" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="ABC-DEF" required>
+        </div>
+        <div class="field">
+          <h2><label for="team-name">Team name</label></h2>
+          <input id="team-name" class="text" autocomplete="off" maxlength="24" placeholder="The Night Owls" required>
+        </div>
+        <button class="primary big">Join the event</button>
+      </form>
+      <p id="rejoin" class="small" hidden>This browser is already on a team here. <button class="link" id="rejoin-btn"></button></p>
+      <p id="host-link" class="small" hidden>You made this event on this device. <a href="#">Open the organizer page</a></p>
+      <p id="join-status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section id="host" class="quest" hidden>
+      <p class="kicker">You are the organizer</p>
+      <div class="code-card">
+        <p class="small">Teams join with this code</p>
+        <p id="big-code" class="big-code"></p>
+        <div class="actions">
+          <button id="copy-link">Copy join link</button>
+          <a id="team-tab" class="button" target="_blank" rel="noopener">Open a team tab</a>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="start" class="primary">Start the clock</button>
+        <button id="end">End the event</button>
+      </div>
+      <p id="clock-host" class="progress"></p>
+      <div class="grid-wrap"><table id="grid" class="grid"></table></div>
+      <p class="small">Tap a photo to see what the judge saw. Strike a proof that does not look right and that team can prove the stop again.</p>
+      <p class="small">This page's address works as the organizer key. Share the join link, not this one.</p>
+      <p id="host-status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section id="play" class="quest" hidden>
+      <p class="kicker" id="team-label"></p>
+      <h2 id="q-title"></h2>
+      <p id="clock" class="progress"></p>
+      <div id="map" class="map"></div>
+      <section id="judge" class="judge" hidden>
+        <p><strong>Proof is a photo, checked on this phone.</strong> A vision model looks at each photo here, so nothing is uploaded until it passes. It is an <span class="mb">89 MB</span> download, once.</p>
+        <button class="primary" id="judge-load">Download the photo judge</button>
+        <progress max="1" value="0" hidden></progress>
+        <p class="load-label small"></p>
+      </section>
+      <ol id="stops" class="stops"></ol>
+      <p id="play-status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section id="board" class="quest" hidden>
+      <p class="kicker">Leaderboard</p>
+      <ol id="rows" class="board"></ol>
+      <p class="small">100 a stop, 25 for the first team to prove it, 50 for proving every stop. Level on points, the team that got its last proof in first is ahead.</p>
+    </section>
+
+    <footer>
+      <p>Each photo is checked on the phone that took it by the <a href="https://github.com/VanshajPoonia/proof-of-grass">TouchGrass judge</a>: is it outdoors, is it the kind of place the stop is, and is it a photo of a screen. The organizer sees every proof photo. <a href="./">Make your own quest</a></p>
+    </footer>
+  </main>
+
+  <dialog id="photo" aria-labelledby="photo-title">
+    <div class="sheet-inner">
+      <button class="close" data-close aria-label="Close">×</button>
+      <h2 id="photo-title"></h2>
+      <img id="photo-img" alt="Proof photo">
+      <p id="photo-meta" class="small"></p>
+      <div class="actions">
+        <button id="strike" class="primary">Strike this proof</button>
+        <button data-close>Close</button>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

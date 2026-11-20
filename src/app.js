@@ -5,6 +5,7 @@ import { mapSvg } from './map-svg.js';
 import { writeMission, writeTitle } from './mission.js';
 import * as gemma from './gemma.js';
 import * as photo from './photo.js';
+import { backend } from './team/index.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -20,7 +21,7 @@ const ICON = {
 
 // ---------- choices -----------------------------------------------------------------
 
-const choice = { where: null, minutes: 40, who: 'solo', seed: 0 };
+const choice = { where: null, minutes: 40, who: 'solo', seed: 0, limit: 45 };
 
 $('#places').innerHTML = PLACES.map((p) => `<button class="chip" data-place="${p.id}">${p.name}<small>${p.city}</small></button>`).join('');
 
@@ -29,11 +30,12 @@ function pick(group, value) {
 }
 document.querySelectorAll('[data-group] button').forEach((b) => b.addEventListener('click', () => {
   const g = b.closest('[data-group]').dataset.group;
-  choice[g] = g === 'minutes' ? Number(b.dataset.value) : b.dataset.value;
+  choice[g] = g === 'minutes' || g === 'limit' ? Number(b.dataset.value) : b.dataset.value;
   pick(g, b.dataset.value);
 }));
 pick('minutes', 40);
 pick('who', 'solo');
+pick('limit', 45);
 
 function setWhere(where, label) {
   choice.where = where;
@@ -172,6 +174,7 @@ function show(q) {
   }).join('');
   const done = q.stops.filter((s) => s.done).length;
   $('#progress').textContent = done === q.stops.length ? 'Quest complete. Go home the long way.' : done ? `${done} of ${q.stops.length} done` : '';
+  $('#host-event').disabled = !q.stops.every((s) => s.mission);
 }
 
 $('#stops').addEventListener('change', (e) => {
@@ -210,6 +213,19 @@ $('#stops').addEventListener('change', async (e) => {
     notes[i] = { kind: 'no', text: err.message };
   }
   if (current === q) show(q);
+});
+
+// A team event: every team walks this quest, and the organizer gets a code and a dashboard.
+$('#host-event').addEventListener('click', async () => {
+  if (!current) return;
+  $('#host-status').textContent = '';
+  try {
+    const name = $('#event-name').value.trim() || current.title || 'WalkQuest team event';
+    const { code, hostKey } = await backend.createEvent({ name, quest: current, minutes: choice.limit || null });
+    location.href = `event.html#code=${code}&host=${hostKey}`;
+  } catch (err) {
+    $('#host-status').textContent = err.message;
+  }
 });
 
 $('#share').addEventListener('click', async () => {
