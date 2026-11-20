@@ -5,7 +5,7 @@
   "scripts": {
     "start": "python3 -m http.server 8000",
     "freeze": "node scripts/freeze-places.mjs",
-    "test": "node tests/plan.mjs && node tests/codes.mjs && node tests/gemma.mjs"
+    "test": "node tests/plan.mjs && node tests/codes.mjs && node tests/score.mjs && node tests/gemma.mjs"
   },
   "license": "MIT",
   "type": "module",
