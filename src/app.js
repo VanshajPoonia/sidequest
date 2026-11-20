@@ -4,6 +4,7 @@ import { toFeatures, planWalk, SPEED, DETOUR } from './plan.js';
 import { mapSvg } from './map-svg.js';
 import { writeMission, writeTitle } from './mission.js';
 import * as gemma from './gemma.js';
+import * as photo from './photo.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -68,6 +69,7 @@ async function featuresFor(where, minutes) {
 }
 
 let busy = false;
+let notes = {}; // per-stop message from the photo judge, kept across renders
 $('#go').addEventListener('click', () => make(0));
 $('#again').addEventListener('click', () => make(choice.seed + 1));
 
@@ -75,6 +77,7 @@ async function make(seed) {
   if (busy || !choice.where) return;
   busy = true;
   choice.seed = seed;
+  notes = {};
   $('#go').disabled = true;
   $('#again').disabled = true;
   status('Reading the map…');
@@ -159,7 +162,10 @@ function show(q) {
         <div class="row">
           <a href="${dir}" target="_blank" rel="noopener">Walk there ↗</a>
           <label><input type="checkbox" data-done="${i}"${s.done ? ' checked' : ''}> Done</label>
+          ${s.mission && !s.proof ? `<label class="camera"><input type="file" accept="image/*" capture="environment" data-prove="${i}">📷 Prove it</label>` : ''}
         </div>
+        ${s.proof ? `<p class="proven"><img src="${esc(s.proof.thumb)}" alt="Your proof photo"> Proven with a photo.</p>` : ''}
+        ${notes[i] && !s.proof ? `<p class="verdict ${notes[i].kind}" data-note="${i}">${esc(notes[i].text)}</p>` : ''}
         ${why}
       </div>
     </li>`;
@@ -174,6 +180,36 @@ $('#stops').addEventListener('change', (e) => {
   current.stops[i].done = e.target.checked;
   store.set('sq:last', current);
   show(current);
+});
+
+// Photo proof: the judge runs on this phone, and the photo never leaves it.
+$('#stops').addEventListener('change', async (e) => {
+  const i = e.target.dataset.prove;
+  const file = e.target.files?.[0];
+  if (i == null || !current) return;
+  e.target.value = '';
+  if (!file) return;
+  const q = current;
+  const s = q.stops[i];
+  const loading = `Downloading the photo judge (${photo.SIZE_MB} MB, once)…`;
+  notes[i] = { kind: 'pending', text: photo.ready() ? 'Checking the photo…' : loading };
+  show(q);
+  try {
+    const say = (text) => { const el = document.querySelector(`[data-note="${i}"]`); if (el) el.textContent = text; };
+    await photo.load((f) => say(`${loading} ${Math.round(f * 100)}%`));
+    say('Checking the photo…');
+    const v = await photo.prove(file, s);
+    if (v.ok) {
+      Object.assign(s, { proof: { thumb: v.thumb, top: v.top }, done: true });
+      delete notes[i];
+      store.set('sq:last', q);
+    } else {
+      notes[i] = { kind: 'no', text: photo.explain(v, s) };
+    }
+  } catch (err) {
+    notes[i] = { kind: 'no', text: err.message };
+  }
+  if (current === q) show(q);
 });
 
 $('#share').addEventListener('click', async () => {
