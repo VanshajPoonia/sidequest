@@ -16,9 +16,11 @@ check('codes are six characters from an alphabet with no 0, O, 1, I or L', () =>
   }
 });
 
-check('2,000 random codes do not repeat', () => {
-  const seen = new Set(Array.from({ length: 2000 }, () => makeCode()));
-  assert.equal(seen.size, 2000);
+// Not "no repeats": with 31^5 codes, 2,000 of them repeat about 7% of the time. The
+// backend makes a new code when one is taken.
+check('every character turns up in every position', () => {
+  const codes = Array.from({ length: 3000 }, () => makeCode());
+  for (let i = 0; i < LENGTH; i++) assert.equal(new Set(codes.map((c) => c[i])).size, ALPHABET.length, `position ${i}`);
 });
 
 check('every single wrong character is caught', () => {
