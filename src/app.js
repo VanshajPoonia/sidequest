@@ -1,6 +1,7 @@
 import { PLACES } from './places.js';
 import { fetchAround } from './osm.js';
-import { toFeatures, planWalk, sketch, SPEED, DETOUR } from './plan.js';
+import { toFeatures, planWalk, SPEED, DETOUR } from './plan.js';
+import { mapSvg } from './map-svg.js';
 import { writeMission, writeTitle } from './mission.js';
 import * as gemma from './gemma.js';
 
@@ -140,7 +141,7 @@ function show(q) {
   $('#quest').hidden = false;
   $('#q-title').textContent = q.title || (q.stops.every((s) => s.mission) ? 'Your sidequest' : 'Your sidequest, being written…');
   $('#q-meta').textContent = `${(q.metres / 1000).toFixed(1)} km loop · about ${q.estimate} min · ${q.stops.length} stops · ${q.place}`;
-  $('#map').innerHTML = mapSvg(q);
+  $('#map').innerHTML = mapSvg(q.start, q.stops, q.stops.map((st) => st.done));
   $('#stops').innerHTML = q.stops.map((s, i) => {
     const from = i ? q.stops[i - 1] : q.start;
     const dir = `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${s.lat},${s.lon}&travelmode=walking`;
@@ -184,20 +185,6 @@ $('#share').addEventListener('click', async () => {
     else { await navigator.clipboard.writeText(text); status('Copied to clipboard.'); }
   } catch { /* dismissed */ }
 });
-
-function mapSvg(q) {
-  const W = 340, H = 230;
-  const { points, scaleBar } = sketch(q.start, q.stops, W, H);
-  const [s, ...ps] = points;
-  const d = `M${s.x},${s.y} ` + ps.map((p) => `L${p.x},${p.y}`).join(' ') + ` L${s.x},${s.y}`;
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sketch map of the loop">
-    <path d="${d}" class="route"/>
-    <g class="start"><circle cx="${s.x}" cy="${s.y}" r="9"/><text x="${s.x}" y="${s.y + 4}">S</text></g>
-    ${ps.map((p, i) => `<g class="pin${q.stops[i].done ? ' done' : ''}"><circle cx="${p.x}" cy="${p.y}" r="11"/><text x="${p.x}" y="${p.y + 4}">${i + 1}</text></g>`).join('')}
-    <g class="north" transform="translate(${W - 20},24)"><path d="M0,-12 L6,6 L0,2 L-6,6 Z"/><text y="18">N</text></g>
-    <g class="scale" transform="translate(14,${H - 14})"><path d="M0,0 H${scaleBar.px}"/><text x="${scaleBar.px / 2}" y="-6">${scaleBar.metres} m</text></g>
-  </svg>`;
-}
 
 // ---------- boot ----------------------------------------------------------------------
 
