@@ -46,7 +46,7 @@ All of it is in `core.js`, as pure functions.
 3. A screen class in the top 2 with at least 5% is a no (`screen`). A photo of grass on a phone still ranks grass first, so the check cannot wait for "screen" to win.
 4. Otherwise the claim passes if one of its ids is in the top 2 with at least 15% (`match`), and fails if not (`other-item`).
 
-`judge(ranked, claim, { topK, minP, screenK, screenP })` lets an app change the numbers. WalkQuest uses top 3 and 10% because its classes overlap more.
+`judge(ranked, claim, { topK, minP, screenK, screenP })` lets an app change the numbers. WalkQuest tried top 3 and 10% for its overlapping place classes and kept the defaults, which let fewer photos pass at the wrong kind of stop (its `tests/proof.mjs`).
 
 ## Measured
 

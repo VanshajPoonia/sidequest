@@ -1,7 +1,7 @@
 {
   "repo": "https://github.com/VanshajPoonia/proof-of-grass",
   "path": "judge",
-  "commit": "31f90a0b3fb24a65600a10569c53f060bab30865",
+  "commit": "2f74c1dd131ef6139958ef826771e699868a6acd",
   "version": "1.0.0",
   "files": {
     "core.js": "00a53b53a309a7a56b59270f34ad6f8c7f705c0f1ae69b537dce7dfa39d5b938",
@@ -9,7 +9,7 @@
     "browser.js": "25589a9f7383b094ef85466a8c254bcfe946f50d78fd3e786b4da283e865581b",
     "node.mjs": "b707051afbbfafc02a18d620ef80dd8faa20497f80974fe8ac95b70f76f0a58b",
     "frames.json": "12d1ad1deb95874440cbe8e619781b488ef7bc434c9e5cedcce1f42b943542f2",
-    "README.md": "638c37da20092ca4c43da3db023f0a431984f0a60ec40e2b0a2408b49422f2ea",
+    "README.md": "a776f053b72dbc19bf7f60341711d564582aedd4e79f8e7867da2ed06c58a5ed",
     "LICENSE": "09fb3063d63bf944eda8776cf9ee41656153b6228891f018a3c7b315e046c7e0"
   }
 }
