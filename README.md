@@ -6,6 +6,8 @@ Turns the real map around you into a short walking quest.
 
 Pick a start and a length (20 minutes, 40, an hour). WalkQuest reads OpenStreetMap around you, picks the most interesting real things within reach (a 500-year-old tomb, a blue plaque, the 1894 Liberty Tree, a whispering bench), routes the shortest loop through them that fits your time, and then **Gemma, running in your browser**, writes you one small thing to do at each stop.
 
+Prove each stop with a photo, checked on the phone. Or run the quest as a team event, with a join code, a live leaderboard and a dashboard for the organizer.
+
 **Live:** https://vanshajpoonia.github.io/sidequest/
 
 > **Stop 2 · 🏛️ Viaduct Bridge.** Cross the Viaduct Bridge and examine the bridge’s construction – is it solid stone or a cleverly constructed timber?
@@ -54,6 +56,36 @@ What the table teaches:
 
 What it cannot catch: invented *ordinary* objects ("the most detailed carving of the lion's head" at a temple with no lions in its tags) and odd phrasing. That is why every stop has a "Why this mission?" panel.
 
+## Prove each stop with a photo
+
+Tap **📷 Prove it** at a stop and take a photo. A vision model on the phone checks it before anything else happens. It is the [TouchGrass judge](https://github.com/VanshajPoonia/proof-of-grass/tree/main/judge), CLIP ViT-B/32 in the browser, an 89 MB download once. It asks three things:
+
+- **Is it outdoors?** Photos of rooms, desks and food are turned away.
+- **Is it a photo of a screen?** A picture of the stop on someone's phone is turned away, most of the time.
+- **Is it the kind of place the stop is?** A memorial can be a statue, a stone or a plaque, so each kind of stop accepts a few classes (`src/proof.js`). Viewpoints accept any outdoor photo.
+
+`npm test` measures it on photos from Wikimedia Commons, credited in `tests/proof-fixtures.json`: 83 photos of real stops in the four preset parks, and 87 photos that should never count (rooms, desks, food, and real photos of screens).
+
+| | Shipped |
+|---|---|
+| Stop photos that pass at a stop of their kind | 75 / 83 |
+| Indoor and screen photos that pass at any stop | 0 / 87 |
+| Stop photos pasted onto a screen that still pass | 66 / 996 |
+| Stop photos that would also pass at a different kind of stop | 303 / 1086 |
+
+Without the screen check, 188 of the 996 stop photos on a screen passed. A looser rule, top 3 at 10%, got one more stop photo right and let 42 more pass at the wrong kind of stop, so the judge's own thresholds ship. Of the 8 misses, 3 are benches the judge read as a picnic area or a garden, and 2 are wide lake views it read as a view. One is a photo inside a greenhouse filed under a garden, and turning that away is right. The wrong-kind row is high on purpose: kinds overlap, so a statue counts at a memorial, an artwork and a landmark. It stops a photo of a bench from proving a tomb, not a statue from proving a memorial.
+
+The judge is copied into `vendor/touchgrass-judge/` from proof-of-grass. A copy is more reliable than loading it from the other app's Pages URL. Quests are walked with no signal, so the judge has to be cached with this app, and a deploy of the bingo app should never break a walk in progress. `npm run sync-judge` copies a new version and records the commit in `SOURCE.json`. `tests/vendor.mjs` fails if the copy is edited here.
+
+## Team events
+
+For a college fest or a team offsite. One person writes a quest and presses **Run it as a team event** under it. They get a six-character code and a dashboard. Teams join on `event.html` with the code and a team name, walk the same quest, and prove each stop with a photo. Only the organizer's device downloads Gemma. Teams need only the 89 MB photo judge.
+
+- **Scoring** (`src/team/score.js`): 100 a stop, 25 for the first team to prove it, 50 for proving every stop. Level on points, the team whose last proof came first is ahead. Proofs before the start, after the time limit or after the organizer ends the event do not count.
+- **Codes** (`src/team/code.js`): no 0, O, 1, I or L. The last character is a check, so every single wrong character and every swap of two neighbours is caught on the phone. `tests/codes.mjs` tries all of them on random codes.
+- **The organizer** starts and ends the clock, sees every team's progress and proof photos, and can strike a proof that looks wrong. The photo check runs on each team's phone, so a team that edits the page could skip it. The organizer seeing every photo is the backstop.
+- **The backend** sits behind a small interface (`src/team/backend.js`). Today it is a local adapter (`src/team/local.js`). Events live in the browser and tabs hear each other over a BroadcastChannel. A whole event runs on one device, and two tabs can play as two teams. Phones cannot see each other yet. That needs a hosted adapter, and `tests/backend-contract.mjs` is the list of checks it has to pass.
+
 ## Privacy and offline
 
 - **No AI service.** Gemma 3 1B instruction-tuned ([onnx-community/gemma-3-1b-it-ONNX](https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX), q4) runs in the tab via [transformers.js](https://github.com/huggingface/transformers.js), WebGPU where available, WASM otherwise. ~860 MB, downloaded once and cached.
@@ -66,7 +98,9 @@ What it cannot catch: invented *ordinary* objects ("the most detailed carving of
 ```bash
 npm start           # static server on :8000, no build step
 npm install         # only for the tests
-npm test            # 31 planner/checker checks + the Gemma evaluation
+npm test            # planner, codes, scoring, backend, vendor and proof-rule checks, then the photo proof and Gemma evaluations
+npm run sync-judge  # copy the TouchGrass judge again from proof-of-grass
+npm run build-proof # after editing PLACES in src/proof.js
 npm run freeze      # re-snapshot the preset parks from Overpass
 ```
 
@@ -78,12 +112,20 @@ src/plan.js      OSM elements -> scored features -> shortest loop that fits; SVG
 src/mission.js   prompts, the checker, the retry-with-feedback loop, templates
 src/gemma.js     Gemma 3 1B in the browser
 src/app.js       UI
+src/map-svg.js   the sketch map, shared by both pages
+src/proof.js     what counts as photo proof at each kind of stop (pure, tested)
+src/photo.js     the photo judge in the browser, thumbnails, messages
+src/team/        team events: code.js, score.js, backend.js (the contract), local.js, index.js
+src/event-app.js the team and organizer page (event.html)
+vendor/touchgrass-judge/  the photo judge, copied from proof-of-grass (see SOURCE.json)
+data/proof-classes.json   precomputed text side of the photo judge
 data/places/     frozen OSM snapshots of the four presets (ODbL)
-tests/           plan.mjs (no model, milliseconds), gemma.mjs (the evaluation)
+tests/           plan.mjs, codes.mjs, score.mjs, backend.mjs, vendor.mjs, proof-rules.mjs (no model, milliseconds),
+                 proof.mjs and gemma.mjs (the evaluations)
 ```
 
 ## Credits
 
-Map data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), available under the ODbL. Gemma is provided under the [Gemma Terms of Use](https://ai.google.dev/gemma/terms). ONNX conversion by onnx-community; runtime by transformers.js and ONNX Runtime Web.
+Map data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), available under the ODbL. Gemma is provided under the [Gemma Terms of Use](https://ai.google.dev/gemma/terms). ONNX conversion by onnx-community; runtime by transformers.js and ONNX Runtime Web. The photo judge is CLIP by OpenAI, ONNX conversion by Xenova. Test photos for photo proof are from Wikimedia Commons, and each one's author and licence is in `tests/proof-fixtures.json` and `vendor/touchgrass-judge/frames.json`.
 
 Code: MIT licence.
