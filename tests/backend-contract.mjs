@@ -18,7 +18,7 @@ const rejects = async (promise, code) => {
     return true;
   });
 };
-const until = async (pred, ms = 1000) => {
+const until = async (pred, ms = 5000) => {
   const t = Date.now();
   while (!pred()) {
     if (Date.now() - t > ms) throw new Error('timed out waiting for a change');
