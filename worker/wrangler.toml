@@ -3,6 +3,10 @@
 name = "walkquest-events"
 main = "index.js"
 compatibility_date = "2026-10-01"
+# Served only from its own domain. The workers.dev address is turned off.
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "events.vanshajpoonia.com", custom_domain = true }]
 
 [[durable_objects.bindings]]
 name = "EVENTS"
