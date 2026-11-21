@@ -178,7 +178,8 @@ export async function contract(name, setup) {
     const { code, ants } = await live({ a, clock });
     const seen = [];
     const off = a.subscribe(code, (snap) => seen.push(snap));
-    assert.equal(seen.length, 1, 'called once straight away');
+    await until(() => seen.length === 1);
+    assert.equal(seen[0].teams.length, 1, 'the first call is the current state');
     await b.joinEvent(code, 'Bees');
     await until(() => seen.at(-1).teams.length === 2);
     await b.submitProof(code, ants.teamKey, { stop: 0 });

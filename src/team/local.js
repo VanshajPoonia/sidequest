@@ -1,6 +1,6 @@
-// The local backend: every event lives in this browser's storage, and tabs hear about
-// each other's changes over a BroadcastChannel. One device, or several tabs on it, can
-// run a whole event. Phones cannot see each other until a hosted adapter exists.
+// The rules engine for team events, over any synchronous key-value store. In the browser
+// that is localStorage plus a BroadcastChannel (createLocalBackend). In the Worker it is
+// one Durable Object's SQLite table, so both run exactly this code.
 //
 // One storage key per record (event, team, proof), the way a document database would
 // hold them, so two tabs writing at once never overwrite each other's records.
@@ -13,15 +13,12 @@ function secret(n = 16) {
   return Array.from(buf, (b) => (b % 36).toString(36)).join('');
 }
 
-export function createLocalBackend({
-  storage = globalThis.localStorage,
-  channel = new BroadcastChannel('walkquest-events'),
-  now = Date.now,
-  newCode = makeCode,
-} = {}) {
+/** `storage` is Web Storage shaped (getItem, setItem, removeItem, length, key) and may add a faster keys(prefix). */
+export function createStoreBackend({ storage, channel, now = Date.now, newCode = makeCode, kind = 'store' }) {
   const read = (k) => { const v = storage.getItem(k); return v == null ? null : JSON.parse(v); };
   const write = (k, v) => storage.setItem(k, JSON.stringify(v));
   const keys = (prefix) => {
+    if (storage.keys) return storage.keys(prefix);
     const out = [];
     for (let i = 0; i < storage.length; i++) {
       const k = storage.key(i);
@@ -60,7 +57,7 @@ export function createLocalBackend({
   }
 
   return {
-    kind: 'local',
+    kind,
 
     async createEvent({ name, quest, minutes = null }) {
       const event = { name: cleanName(name, LIMITS.eventName), quest: cleanQuest(quest), minutes: cleanMinutes(minutes), createdAt: now(), startedAt: null, endedAt: null };
@@ -154,3 +151,10 @@ export function createLocalBackend({
     },
   };
 }
+
+/** Events in this browser only. Tabs hear each other over a BroadcastChannel. */
+export const createLocalBackend = ({
+  storage = globalThis.localStorage,
+  channel = new BroadcastChannel('walkquest-events'),
+  ...rest
+} = {}) => createStoreBackend({ storage, channel, kind: 'local', ...rest });
