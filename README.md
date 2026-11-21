@@ -84,12 +84,25 @@ For a college fest or a team offsite. One person writes a quest and presses **Ru
 - **Scoring** (`src/team/score.js`): 100 a stop, 25 for the first team to prove it, 50 for proving every stop. Level on points, the team whose last proof came first is ahead. Proofs before the start, after the time limit or after the organizer ends the event do not count.
 - **Codes** (`src/team/code.js`): no 0, O, 1, I or L. The last character is a check, so every single wrong character and every swap of two neighbours is caught on the phone. `tests/codes.mjs` tries all of them on random codes.
 - **The organizer** starts and ends the clock, sees every team's progress and proof photos, and can strike a proof that looks wrong. The photo check runs on each team's phone, so a team that edits the page could skip it. The organizer seeing every photo is the backstop.
-- **The backend** sits behind a small interface (`src/team/backend.js`). Today it is a local adapter (`src/team/local.js`). Events live in the browser and tabs hear each other over a BroadcastChannel. A whole event runs on one device, and two tabs can play as two teams. Phones cannot see each other yet. That needs a hosted adapter, and `tests/backend-contract.mjs` is the list of checks it has to pass.
+- **A QR code** for the join link sits under the big code on the organizer page. The encoder is 264 lines with no library (`src/qr.js`). `tests/qr.mjs` checks it against the spec's examples, and `node scripts/qr-roundtrip.mjs` reads 47 symbols back with macOS CoreImage, every version from 1 to 10 at every error correction level plus real join links. All 47 come back exactly.
+- **Distance as a second signal.** When a team proves a stop, the phone reads its location once and sends only how far it was from the stop (`src/locate.js`). The organizer sees it under each photo, in red past 150 m. A refused, missing or slow location sends no distance and the proof still counts.
+- **The backend** sits behind a small interface (`src/team/backend.js`), and one rules engine (`src/team/local.js`) runs everywhere. By default events live in the browser and tabs hear each other over a BroadcastChannel, so a whole event runs on one device. For phones to see each other there is a hosted backend in `worker/`: a Cloudflare Worker with one Durable Object per event. The object runs the same rules engine over its own SQLite table, owns the clock and the keys, and pushes every change to every phone over a WebSocket. It refuses browsers from other sites, caps requests at 80 KB and clears events after 30 days.
+
+`tests/backend-contract.mjs` is the list of checks a backend has to pass. `npm test` runs it against the local adapter. `npm run test:cloud` starts the Worker under `wrangler dev`, locally and with no account, and runs the same 17 checks through `src/team/cloud.js`, plus five server ones. One of those has team A prove a stop and checks that it reaches team B and the organizer.
+
+### Turning on the hosted backend
+
+The live site uses the local backend until a Worker is deployed. To switch:
+
+1. Make a free Cloudflare account at https://dash.cloudflare.com/sign-up.
+2. In `worker/`, run `npx wrangler@4.158.0 login`.
+3. In `worker/`, run `npx wrangler@4.158.0 deploy`. It prints a URL like `https://walkquest-events.<you>.workers.dev`.
+4. Paste that URL into `BACKEND_URL` in `src/team/index.js`, run `npm test` and push `main`.
 
 ## Privacy and offline
 
 - **No AI service.** Gemma 3 1B instruction-tuned ([onnx-community/gemma-3-1b-it-ONNX](https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX), q4) runs in the tab via [transformers.js](https://github.com/huggingface/transformers.js), WebGPU where available, WASM otherwise. ~860 MB, downloaded once and cached.
-- **Your exact location never leaves the device.** "Start where I am" snaps the position to a ~500 m grid before querying Overpass, pads the radius to cover the snap, and filters by true distance locally.
+- **Your exact location never leaves the device.** "Start where I am" snaps the position to a ~500 m grid before querying Overpass, pads the radius to cover the snap, and filters by true distance locally. In a team event, a proof carries only how many metres it was taken from the stop.
 - **Quests work with no signal.** A written quest is saved on the phone; the map is an SVG sketch drawn from coordinates, no tiles. A service worker serves the app shell offline. Write the quest at home on wifi, walk it anywhere.
 - **Four preset parks** (Lodhi Garden, Golden Gate Park, Hampstead Heath, Central Park) are frozen OSM snapshots in `data/places/`, so the demo works without sharing a location and the tests have fixed fixtures.
 
@@ -98,9 +111,11 @@ For a college fest or a team offsite. One person writes a quest and presses **Ru
 ```bash
 npm start           # static server on :8000, no build step
 npm install         # only for the tests
-npm test            # planner, codes, scoring, backend, vendor and proof-rule checks, then the photo proof and Gemma evaluations
+npm test            # planner, codes, scoring, backend, vendor, proof-rule, QR and location checks, then the photo proof and Gemma evaluations
 npm run sync-judge  # copy the TouchGrass judge again from proof-of-grass
 npm run build-proof # after editing PLACES in src/proof.js
+npm run test:cloud  # the hosted backend under wrangler dev (fetches wrangler@4.158.0 through npx)
+node scripts/qr-roundtrip.mjs  # QR codes read back by macOS CoreImage
 npm run freeze      # re-snapshot the preset parks from Overpass
 ```
 
@@ -115,13 +130,17 @@ src/app.js       UI
 src/map-svg.js   the sketch map, shared by both pages
 src/proof.js     what counts as photo proof at each kind of stop (pure, tested)
 src/photo.js     the photo judge in the browser, thumbnails, messages
-src/team/        team events: code.js, score.js, backend.js (the contract), local.js, index.js
+src/team/        team events: code.js, score.js, backend.js (the contract), local.js (the rules engine),
+                 cloud.js (the hosted adapter), index.js (which one, one config line)
+src/qr.js        QR codes for the join link
+src/locate.js    how far from the stop a proof was taken
+worker/          the hosted backend: a Cloudflare Worker and Durable Object, wrangler.toml
 src/event-app.js the team and organizer page (event.html)
 vendor/touchgrass-judge/  the photo judge, copied from proof-of-grass (see SOURCE.json)
 data/proof-classes.json   precomputed text side of the photo judge
 data/places/     frozen OSM snapshots of the four presets (ODbL)
-tests/           plan.mjs, codes.mjs, score.mjs, backend.mjs, vendor.mjs, proof-rules.mjs (no model, milliseconds),
-                 proof.mjs and gemma.mjs (the evaluations)
+tests/           plan.mjs, codes.mjs, score.mjs, backend.mjs, vendor.mjs, proof-rules.mjs, qr.mjs, locate.mjs
+                 (no model, milliseconds), proof.mjs and gemma.mjs (the evaluations), cloud.mjs (the Worker)
 ```
 
 ## Credits
