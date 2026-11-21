@@ -92,14 +92,9 @@ For a college fest or a team offsite. One person writes a quest and presses **Ru
 
 `tests/backend-contract.mjs` is the list of checks a backend has to pass. `npm test` runs it against the local adapter. `npm run test:cloud` starts the Worker under `wrangler dev`, locally and with no account, and runs the same 17 checks through `src/team/cloud.js`, plus five server ones. One of those has team A prove a stop and checks that it reaches team B and the organizer.
 
-### Turning on the hosted backend
+### The hosted backend
 
-The live site uses the local backend until a Worker is deployed. To switch:
-
-1. Make a free Cloudflare account at https://dash.cloudflare.com/sign-up.
-2. In `worker/`, run `npx wrangler@4.158.0 login`.
-3. In `worker/`, run `npx wrangler@4.158.0 deploy`. It prints a URL like `https://walkquest-events.<you>.workers.dev`.
-4. Paste that URL into `BACKEND_URL` in `src/team/index.js`, run `npm test` and push `main`.
+The live site uses the Worker at https://events.vanshajpoonia.com, set in `BACKEND_URL` in `src/team/index.js`. It is served only from that domain, with the workers.dev address turned off (`worker/wrangler.toml`). To ship a change to it, run `npx wrangler@4.158.0 deploy` in `worker/`. Deploying needs a Wrangler login with the Workers and zone read permissions. Set `BACKEND_URL` to `''` to go back to one-device events.
 
 ## Privacy and offline
 
