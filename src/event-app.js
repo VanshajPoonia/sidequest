@@ -9,6 +9,7 @@ import { leaderboard, status, closesAt } from './team/score.js';
 import { mapSvg } from './map-svg.js';
 import * as photo from './photo.js';
 import { encode, toSvg } from './qr.js';
+import { position, distance, far, FAR } from './locate.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -144,7 +145,7 @@ function renderHost(rows) {
   $('#grid').innerHTML = `<thead><tr><th>#</th><th>Team</th>${stops.map((s, i) => `<th title="${esc(s.title)}">${i + 1}</th>`).join('')}<th>Pts</th></tr></thead>
     <tbody>${rows.map((r) => `<tr>
       <td>${r.rank}</td><td class="team">${esc(r.name)}</td>
-      ${r.stops.map((p, i) => `<td>${p ? `<button class="cell" data-team="${esc(r.team)}" data-stop="${i}" aria-label="${esc(r.name)}, stop ${i + 1}"><img src="${esc(p.thumb)}" alt=""></button>` : '<span class="dot">·</span>'}</td>`).join('')}
+      ${r.stops.map((p, i) => `<td>${p ? `<button class="cell" data-team="${esc(r.team)}" data-stop="${i}" aria-label="${esc(r.name)}, stop ${i + 1}"><img src="${esc(p.thumb)}" alt=""></button>${p.metres == null ? '' : `<span class="far${p.metres > FAR ? ' warn' : ''}">${far(p.metres)}</span>`}` : '<span class="dot">·</span>'}</td>`).join('')}
       <td class="pts">${r.points}</td>
     </tr>`).join('') || `<tr><td colspan="${stops.length + 3}" class="empty">No teams yet. Share the code.</td></tr>`}</tbody>`;
 }
@@ -215,12 +216,13 @@ $('#stops').addEventListener('change', async (e) => {
   const stop = snap.event.quest.stops[i];
   notes[i] = { kind: 'pending', text: photo.ready() ? 'Checking the photo…' : 'Downloading the photo judge first…' };
   render();
+  const where = position(); // asked now, while the photo is checked
   try {
     await ensureJudge();
     const v = await photo.prove(file, stop);
     if (v.ok) {
       notes[i] = null;
-      await backend.submitProof(code, me.teamKey, { stop: i, thumb: v.thumb, top: v.top });
+      await backend.submitProof(code, me.teamKey, { stop: i, thumb: v.thumb, top: v.top, ...distance(stop, await where) });
     } else {
       notes[i] = { kind: 'no', text: photo.explain(v, stop) };
     }
@@ -262,7 +264,9 @@ $('#grid').addEventListener('click', (e) => {
   $('#photo-title').textContent = `${team.name} at stop ${stop + 1}`;
   $('#photo-img').src = p.thumb;
   const seen = p.top.map((t) => `${t.name} ${(t.p * 100).toFixed(0)}%`).join(', ');
-  $('#photo-meta').textContent = `${snap.event.quest.stops[stop].title}. Proven at ${new Date(p.at).toLocaleTimeString()}. The judge saw: ${seen || 'nothing recorded'}.`;
+  const place = p.metres == null ? 'No location was shared.'
+    : `Taken ${far(p.metres)} from the stop${p.accuracy == null ? '' : `, location good to ${far(p.accuracy)}`}.${p.metres > FAR ? ' That is far for a photo of this stop.' : ''}`;
+  $('#photo-meta').textContent = `${snap.event.quest.stops[stop].title}. Proven at ${new Date(p.at).toLocaleTimeString()}. The judge saw: ${seen || 'nothing recorded'}. ${place}`;
   $('#photo').showModal();
 });
 
