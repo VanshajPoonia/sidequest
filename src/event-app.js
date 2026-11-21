@@ -103,7 +103,9 @@ function tick() {
 function render() {
   if (!snap) {
     $('#ev-name').textContent = 'No such event here';
-    $('#ev-meta').textContent = 'This event is not in this browser. Events live on the device that made them until a shared backend is switched on.';
+    $('#ev-meta').textContent = backend.kind === 'local'
+      ? 'This event is not in this browser. Events live on the device that made them until a shared backend is switched on.'
+      : 'There is no event with that code. Check it with the organizer.';
     return;
   }
   const { event } = snap;

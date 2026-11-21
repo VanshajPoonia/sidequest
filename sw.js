@@ -2,13 +2,13 @@
 // worst, so the saved quest (localStorage) and this app shell must open with no network.
 // Gemma's weights live in transformers.js's own Cache Storage; the library build from
 // jsDelivr is cached here the first time it is fetched.
-const SHELL = 'sq-shell-v2';
+const SHELL = 'sq-shell-v3';
 const RUNTIME = 'sq-runtime-v1';
 const FILES = [
   './', 'index.html', 'event.html', 'assets/styles.css', 'manifest.webmanifest',
   'src/app.js', 'src/gemma.js', 'src/mission.js', 'src/osm.js', 'src/places.js', 'src/plan.js', 'src/map-svg.js',
   'src/photo.js', 'src/proof.js', 'vendor/touchgrass-judge/core.js', 'vendor/touchgrass-judge/browser.js', 'vendor/touchgrass-judge/vocab.js', 'data/proof-classes.json',
-  'src/event-app.js', 'src/team/index.js', 'src/team/local.js', 'src/team/backend.js', 'src/team/code.js', 'src/team/score.js',
+  'src/event-app.js', 'src/team/index.js', 'src/team/local.js', 'src/team/cloud.js', 'src/team/backend.js', 'src/team/code.js', 'src/team/score.js',
   'data/places/lodhi.json', 'data/places/goldengate.json', 'data/places/hampstead.json', 'data/places/centralpark.json',
 ];
 
