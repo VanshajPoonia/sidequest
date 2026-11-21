@@ -119,6 +119,17 @@ export async function contract(name, setup) {
     assert.equal((await a.snapshot(code)).proofs.length, 1);
   });
 
+  await check('a proof can say how far from the stop it was taken, and works without', async ({ a, clock }) => {
+    const { code, ants } = await live({ a, clock });
+    const near = await a.submitProof(code, ants.teamKey, { stop: 0, metres: 42.4, accuracy: 9.6 });
+    assert.deepEqual([near.metres, near.accuracy], [42, 10]);
+    const none = await a.submitProof(code, ants.teamKey, { stop: 1 });
+    assert.deepEqual([none.metres, none.accuracy], [null, null]);
+    const bad = await a.submitProof(code, ants.teamKey, { stop: 2, metres: -5, accuracy: 'close' });
+    assert.deepEqual([bad.metres, bad.accuracy], [null, null]);
+    assert.equal((await a.snapshot(code)).proofs.find((p) => p.stop === 0).metres, 42);
+  });
+
   await check('a team key only proves for its own team, in its own event', async ({ a, clock }) => {
     const { code, ants } = await live({ a, clock });
     const other = await a.createEvent({ name: 'y', quest: QUEST });

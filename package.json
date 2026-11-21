@@ -7,7 +7,7 @@
     "freeze": "node scripts/freeze-places.mjs",
     "sync-judge": "node scripts/sync-judge.mjs",
     "build-proof": "node scripts/build-proof-classes.mjs",
-    "test": "node tests/plan.mjs && node tests/codes.mjs && node tests/score.mjs && node tests/backend.mjs && node tests/vendor.mjs && node tests/proof-rules.mjs && node tests/qr.mjs && node tests/proof.mjs && node tests/gemma.mjs",
+    "test": "node tests/plan.mjs && node tests/codes.mjs && node tests/score.mjs && node tests/backend.mjs && node tests/vendor.mjs && node tests/proof-rules.mjs && node tests/qr.mjs && node tests/locate.mjs && node tests/proof.mjs && node tests/gemma.mjs",
     "test:cloud": "node tests/cloud.mjs"
   },
   "license": "MIT",
