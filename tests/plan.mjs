@@ -5,6 +5,8 @@ import { toFeatures, planWalk, bestLoop, metres, sketch, stopsFor } from '../src
 import { problems, clean, fallback } from '../src/mission.js';
 import { snap, SNAP } from '../src/osm.js';
 import { PLACES } from '../src/places.js';
+import { demoQuest } from '../src/team/demo.js';
+import { cleanQuest } from '../src/team/backend.js';
 
 let n = 0;
 const check = (name, fn) => { fn(); n++; console.log(`ok  ${name}`); };
@@ -90,6 +92,14 @@ check('every fallback passes the checker', () => {
   for (const id of ['lodhi', 'hampstead', 'goldengate', 'centralpark']) {
     for (const f of load(id)) assert.deepEqual(problems(fallback(f), f).filter((p) => p.type !== 'long'), [], `${f.kind}: ${fallback(f)}`);
   }
+});
+
+check('a demo event quest is a real loop with a plain mission at every stop', () => {
+  const place = PLACES.find((p) => p.id === 'hampstead');
+  const q = demoQuest(place, JSON.parse(readFileSync(new URL('../data/places/hampstead.json', import.meta.url))).elements);
+  assert.equal(q.stops.length, 3);
+  for (const s of q.stops) assert.deepEqual(problems(s.mission, s).filter((p) => p.type !== 'long'), [], s.mission);
+  assert.equal(cleanQuest(q).stops.length, 3);
 });
 
 console.log(`\n${n} planner checks passed\n`);

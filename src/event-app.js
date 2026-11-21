@@ -10,6 +10,8 @@ import { mapSvg } from './map-svg.js';
 import * as photo from './photo.js';
 import { encode, toSvg } from './qr.js';
 import { position, distance, far, FAR } from './locate.js';
+import { PLACES } from './places.js';
+import { demoQuest } from './team/demo.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -65,6 +67,18 @@ function showJoin(message) {
 $('#rejoin-btn').addEventListener('click', () => {
   tab.set(`wq:me:${code}`, device.get(`wq:me:${code}`));
   location.reload();
+});
+
+$('#demo').addEventListener('click', async () => {
+  $('#join-status').textContent = 'Making a demo event…';
+  try {
+    const place = PLACES.find((p) => p.id === 'hampstead');
+    const map = await (await fetch(`data/places/${place.id}.json`)).json();
+    const made = await backend.createEvent({ name: 'Demo event', quest: demoQuest(place, map.elements), minutes: 45 });
+    location.hash = `code=${made.code}&host=${made.hostKey}`;
+  } catch (err) {
+    $('#join-status').textContent = err.message;
+  }
 });
 
 $('#join-form').addEventListener('submit', async (e) => {
