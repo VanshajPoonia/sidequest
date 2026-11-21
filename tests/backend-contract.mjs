@@ -113,7 +113,7 @@ export async function contract(name, setup) {
     assert.equal(p.at, clock.t);
     assert.equal(p.team, ants.team.id);
     clock.t += 60000;
-    const again = await a.submitProof(code, ants.teamKey, { stop: 1, thumb: 'data:other' });
+    const again = await a.submitProof(code, ants.teamKey, { stop: 1, thumb: 'data:image/png;base64,BBBB' });
     assert.equal(again.at, p.at);
     assert.equal(again.thumb, p.thumb);
     assert.equal((await a.snapshot(code)).proofs.length, 1);
@@ -132,6 +132,8 @@ export async function contract(name, setup) {
     await rejects(a.submitProof(code, ants.teamKey, { stop: 3 }), 'bad-stop');
     await rejects(a.submitProof(code, ants.teamKey, { stop: '0' }), 'bad-stop');
     await rejects(a.submitProof(code, ants.teamKey, { stop: 0, thumb: 'x'.repeat(70000) }), 'too-big');
+    await rejects(a.submitProof(code, ants.teamKey, { stop: 0, thumb: 'javascript:alert(1)' }), 'bad-photo');
+    await rejects(a.submitProof(code, ants.teamKey, null), 'bad-stop');
   });
 
   await check('no proofs after the time limit or after End', async ({ a, clock }) => {

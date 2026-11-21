@@ -71,15 +71,18 @@ export function cleanMinutes(m) {
   return m;
 }
 
+const PHOTO = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/;
+
 export function checkProof(event, input, now) {
   if (status(event, now) !== 'live') fail('not-live', event.startedAt == null ? 'The organizer has not started yet.' : 'Time is up.');
-  const { stop, thumb = '', top = [] } = input;
+  const { stop, thumb = '', top = [] } = input ?? {};
   if (!Number.isInteger(stop) || stop < 0 || stop >= event.quest.stops.length) fail('bad-stop', 'There is no such stop.');
   if (typeof thumb !== 'string' || thumb.length > LIMITS.thumb) fail('too-big', 'That photo is too big to send.');
+  if (thumb && !PHOTO.test(thumb)) fail('bad-photo', 'That is not a photo.');
   return {
     stop,
     thumb,
-    top: top.slice(0, 3).map((t) => ({ id: String(t.id), name: String(t.name ?? t.id), p: Number(t.p) || 0 })),
+    top: (Array.isArray(top) ? top : []).slice(0, 3).map((t) => ({ id: String(t?.id), name: String(t?.name ?? t?.id), p: Number(t?.p) || 0 })),
   };
 }
 
