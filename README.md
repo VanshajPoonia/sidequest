@@ -70,10 +70,12 @@ Tap **📷 Prove it** at a stop and take a photo. A vision model on the phone ch
 |---|---|
 | Stop photos that pass at a stop of their kind | 75 / 83 |
 | Indoor and screen photos that pass at any stop | 0 / 87 |
-| Stop photos pasted onto a screen that still pass | 66 / 996 |
-| Stop photos that would also pass at a different kind of stop | 303 / 1086 |
+| Stop photos pasted onto a screen that still pass | 68 / 996 |
+| Stop photos that would also pass at a different kind of stop | 300 / 1086 |
 
-Without the screen check, 188 of the 996 stop photos on a screen passed. A looser rule, top 3 at 10%, got one more stop photo right and let 42 more pass at the wrong kind of stop, so the judge's own thresholds ship. Of the 8 misses, 3 are benches the judge read as a picnic area or a garden, and 2 are wide lake views it read as a view. One is a photo inside a greenhouse filed under a garden, and turning that away is right. The wrong-kind row is high on purpose: kinds overlap, so a statue counts at a memorial, an artwork and a landmark. It stops a photo of a bench from proving a tomb, not a statue from proving a memorial.
+Without the screen check, 187 of the 996 stop photos on a screen passed. A looser rule, top 3 at 10%, got one more stop photo right and let 45 more pass at the wrong kind of stop, so the judge's own thresholds ship. Of the 8 misses, 3 are benches the judge read as a picnic area or a garden, and 2 are wide lake views it read as a view. One is a photo inside a greenhouse filed under a garden, and turning that away is right. The wrong-kind row is high on purpose: kinds overlap, so a statue counts at a memorial, an artwork and a landmark. It stops a photo of a bench from proving a tomb, not a statue from proving a memorial.
+
+These are from a clean run on 21 November. A clean run the day before gave 66, 188 and 303 in the same rows, with the same right-kind and leak numbers. The code, model and library versions were the same, and re-embedding a photo is repeatable to the bit within a run. So the likeliest cause is the photos fetched from Wikimedia differing between days, but that is not confirmed. Treat these rows as plus or minus 3.
 
 The judge is copied into `vendor/touchgrass-judge/` from proof-of-grass. A copy is more reliable than loading it from the other app's Pages URL. Quests are walked with no signal, so the judge has to be cached with this app, and a deploy of the bingo app should never break a walk in progress. `npm run sync-judge` copies a new version and records the commit in `SOURCE.json`. `tests/vendor.mjs` fails if the copy is edited here.
 
