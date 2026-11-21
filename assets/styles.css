@@ -143,6 +143,8 @@ button.link { border: 0; background: none; padding: 0; color: var(--teal); font:
 .code-card .small { margin: 0; }
 .big-code { margin: 4px 0 0; font: 700 44px/1.1 ui-monospace, Menlo, monospace; letter-spacing: .1em; color: var(--teal); }
 .code-card .actions { justify-content: center; margin-bottom: 0; }
+.qr { width: min(220px, 70vw); margin: 10px auto 4px; }
+.qr svg { display: block; width: 100%; height: auto; border-radius: 8px; }
 a.button { display: inline-block; font: 600 15px/1.2 var(--sans); color: var(--ink); text-decoration: none; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
 .grid-wrap { overflow-x: auto; margin: 10px 0 0; }
 .grid { width: 100%; border-collapse: collapse; font-size: 14px; }

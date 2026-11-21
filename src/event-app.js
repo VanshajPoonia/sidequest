@@ -8,6 +8,7 @@ import { normalizeCode, isValidCode, formatCode } from './team/code.js';
 import { leaderboard, status, closesAt } from './team/score.js';
 import { mapSvg } from './map-svg.js';
 import * as photo from './photo.js';
+import { encode, toSvg } from './qr.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -136,6 +137,7 @@ function renderHost(rows) {
   const st = status(event);
   $('#big-code').textContent = formatCode(code);
   $('#team-tab').href = joinLink();
+  if (!$('#qr').firstChild) $('#qr').innerHTML = toSvg(encode(joinLink()), `QR code for the join link to ${formatCode(code)}`);
   $('#start').disabled = st !== 'lobby';
   $('#end').disabled = st !== 'live';
   const stops = event.quest.stops;
