@@ -1,0 +1,17 @@
+# The WalkQuest event server. Deploy from this folder with the pinned wrangler:
+#   npx wrangler@4.158.0 deploy
+name = "walkquest-events"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+[[durable_objects.bindings]]
+name = "EVENTS"
+class_name = "EventRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["EventRoom"]
+
+[vars]
+# Browsers on any other site are refused. Space separated.
+ALLOWED_ORIGINS = "https://vanshajpoonia.github.io http://localhost:8000 http://127.0.0.1:8000"
